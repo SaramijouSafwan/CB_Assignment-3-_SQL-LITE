@@ -40,16 +40,51 @@ public class DB_Sqlite extends SQLiteOpenHelper {
         while (!cursor.isAfterLast()) {
             String id = cursor.getString(0);
             String Name = cursor.getString(1);
-            String Email = cursor.getString(2);
-            String Phone = cursor.getString(3);
-            String Title = cursor.getString(4);
-            String Dept = cursor.getString(5);
-            Cursor deptCursor = DataBase.rawQuery("select name from department where deptId == ?", new String[]{Dept});
-            deptCursor.moveToFirst();
-            employee.add("[" + id + "] " + " " + Name + " | " + Email + " | " + Phone + " | " + Title + " | " + deptCursor.getString(0));
+            employee.add(Name);
             cursor.moveToNext();
         }
         return employee;
+    }
+
+    public String getEmployeeId(String empName) {
+        String id = "";
+        SQLiteDatabase DataBase = this.getReadableDatabase();
+        Cursor cursor = DataBase.rawQuery("select * from employee where name == ? ", new String[]{empName});
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            id = cursor.getString(0);
+            cursor.moveToNext();
+        }
+        return id;
+    }
+
+    public ArrayList getEmployeeData(String empId) {
+        ArrayList employeeInfo = new ArrayList();
+        SQLiteDatabase DataBase = this.getReadableDatabase();
+        Cursor cursor = DataBase.rawQuery("select * from employee where empId == ? ", new String[]{empId});
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            // Id Name Email Phone Title DeptId
+            employeeInfo.add(cursor.getString(0));
+            employeeInfo.add(cursor.getString(1));
+            employeeInfo.add(cursor.getString(2));
+            employeeInfo.add(cursor.getString(3));
+            employeeInfo.add(cursor.getString(4));
+            String DeptName = getDeptName(cursor.getString(5));
+            employeeInfo.add(DeptName);
+            cursor.moveToNext();
+        }
+        return employeeInfo;
+    }
+
+
+
+    public String getDeptName(String deptId) {
+        SQLiteDatabase DataBase = this.getReadableDatabase();
+        Cursor deptCursor = DataBase.rawQuery("select name from department where deptId == ?", new String[]{deptId});
+        deptCursor.moveToFirst();
+        String DeptName = deptCursor.getString(0);
+        return DeptName;
     }
 
     public void addEmployee() {
@@ -78,7 +113,7 @@ public class DB_Sqlite extends SQLiteOpenHelper {
         Emp3.put("email", "hotmail.com");
         Emp3.put("phone", "01234");
         Emp3.put("title", "Employee");
-        Emp3.put("deptId", 1);
+        Emp3.put("deptId", 2);
 
         SQLiteDatabase DataBase = this.getWritableDatabase();
         DataBase.insert("department", null, Dept1);
